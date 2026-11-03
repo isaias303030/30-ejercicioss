@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>30 ejercicios en React</title>
+<style>
+:root{--bg:#f6f7fb;--fg:#1c2033;--card:#fff;--mut:#6a7090;--ac:#5b5bd6;--acf:#fff;--bd:#e2e5f0;--err:#c62b3c;--out:#eef0fb;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#13151f;--fg:#e8eaf6;--card:#1d2030;--mut:#9aa0c3;--ac:#8c8cff;--acf:#13151f;--bd:#2c3048;--err:#ff7a88;--out:#262a40;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#13151f;--fg:#e8eaf6;--card:#1d2030;--mut:#9aa0c3;--ac:#8c8cff;--acf:#13151f;--bd:#2c3048;--err:#ff7a88;--out:#262a40;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.app{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
+aside{background:var(--card);border-right:1px solid var(--bd);padding:16px;position:sticky;top:0;height:100vh;overflow:auto}
+h1{font-size:18px;margin:0 0 4px}.sub{color:var(--mut);font-size:12px;margin:0 0 12px}
+input,textarea{width:100%;padding:9px 11px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--fg);font:inherit}
+input:focus,textarea:focus{outline:2px solid var(--ac);outline-offset:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.chip{border:1px solid var(--bd);background:none;color:var(--fg);padding:3px 10px;border-radius:99px;cursor:pointer;font-size:12px}
+.chip.on{background:var(--ac);color:var(--acf);border-color:var(--ac)}
+.item{display:flex;gap:8px;width:100%;text-align:left;border:0;background:none;color:var(--fg);padding:8px 9px;border-radius:9px;cursor:pointer;font:inherit}
+.item:hover{background:var(--bg)}.item.on{background:var(--ac);color:var(--acf)}
+.item b{min-width:24px;opacity:.7}.item span{flex:1}
+main{padding:24px;max-width:760px;width:100%}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:20px}
+.hd{display:flex;justify-content:space-between;align-items:start;gap:8px}h2{margin:0;font-size:20px}
+.d{color:var(--mut);margin:6px 0 14px}.tag{font-size:11px;color:var(--ac);text-transform:uppercase;letter-spacing:.06em}
+label{display:block;margin:10px 0;font-size:13px;color:var(--mut)}label>*{margin-top:4px;color:var(--fg)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.btn,.ib{border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:9px;padding:6px 12px;cursor:pointer;font:inherit}
+.btn:hover,.ib:hover{border-color:var(--ac)}.ib{font-size:18px;padding:2px 10px}
+.out{background:var(--out);border-radius:10px;padding:14px;margin:0;white-space:pre-wrap;word-break:break-word;font:14px/1.6 ui-monospace,Menlo,Consolas,monospace}
+.err{color:var(--err)}.nav{display:flex;justify-content:space-between;margin-top:14px}
+.top{display:flex;gap:8px;margin-bottom:14px;align-items:center}.top .grow{flex:1}.menu{display:none}
+.empty{color:var(--mut);padding:10px}kbd{border:1px solid var(--bd);border-radius:4px;padding:0 4px;font-size:11px}
+@media(max-width:760px){.app{grid-template-columns:1fr}aside{display:none;position:static;height:auto;max-height:70vh}aside.open{display:block}.menu{display:inline-block}main{padding:14px}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script>
+const {useState,useEffect,useRef}=React,h=React.createElement;
+const f2=x=>Math.round(x*100)/100;
+const P=s=>{const x=parseFloat(s);if(isNaN(x))throw Error('Completa los campos con números válidos');return x};
+const L=s=>{const a=s.split(/[\s,;]+/).filter(Boolean).map(Number);if(!a.length||a.some(isNaN))throw Error('Ingresa números válidos separados por espacios');return a};
+const R=(s,k=2)=>{const r=s.split('\n').map(l=>l.trim()).filter(Boolean).map(L);if(!r.length||r.some(x=>x.length<k))throw Error('Cada línea necesita '+k+' números');return r};
+const sum=a=>a.reduce((p,c)=>p+c,0);
+const norm=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const pos=(v,m)=>{if(v<0)throw Error(m);return v};
+const big=b=>{const s=b.toString();return s.length>60?s.slice(0,30)+'… ('+s.length+' dígitos)':s};
+const X=[
+[1,'Salario con horas extra','Condicionales','Pasadas 40 horas, cada hora extra se paga con 50% adicional.','h|Horas trabajadas|n|45;t|Tarifa por hora|n|10',v=>{const a=pos(P(v.h),'Las horas no pueden ser negativas'),t=P(v.t),x=Math.max(0,a-40);return['Horas extra: '+x,'Salario: '+f2(Math.min(a,40)*t+x*t*1.5)]}],
+[2,'Descuento sobre el sueldo','Condicionales','10% hasta 1000; 5% del adicional hasta 2000; 3% del adicional por encima.','s|Sueldo|n|2500',v=>{const s=pos(P(v.s),'El sueldo no puede ser negativo'),d=s<=1000?s*.1:s<=2000?100+(s-1000)*.05:150+(s-2000)*.03;return['Descuento: '+f2(d),'Sueldo neto: '+f2(s-d)]}],
+[3,'Descuento por monto','Condicionales','10% si el monto supera 100; 2% en caso contrario.','m|Monto|n|250',v=>{const m=P(v.m);if(m<=0)throw Error('El monto debe ser positivo');const d=m*(m>100?.1:.02);return['Descuento: '+f2(d),'A pagar: '+f2(m-d)]}],
+[4,'Segundos y minutos','Condicionales','Convierte segundos a minutos y calcula cuántos faltan para completar el siguiente minuto.','s|Segundos|n|520',v=>{const s=Math.floor(P(v.s));if(s<=0)throw Error('Ingresa un número positivo');const r=s%60;return['Equivale a '+Math.floor(s/60)+' min y '+r+' s','Faltan '+(60-r)%60+' s para un minuto exacto']}],
+[5,'Minutos a días, horas y minutos','Condicionales','Descompone un tiempo en minutos.','t|Minutos|n|20155',v=>{const t=Math.floor(pos(P(v.t),'El tiempo no puede ser negativo'));return[Math.floor(t/1440)+' días, '+Math.floor(t%1440/60)+' horas y '+t%60+' minutos']}],
+[6,'Suma de los N primeros naturales','Ciclos','Suma con un bucle e imprime cada término.','n|N|n|4',v=>{const n=Math.floor(P(v.n));if(n<1)throw Error('N debe ser al menos 1');let s=0,o=[];for(let i=1;i<=n;i++){s+=i;if(n<=30)o.push('n'+i+': '+i)}return[...o,'Suma de la serie: '+s]}],
+[7,'Suma de salarios','Ciclos','Una línea por trabajador: horas y tarifa.','a|Trabajadores (horas tarifa)|a|4 4\n4 5\n4 5\n4 4',v=>{const t=R(v.a).map(([a,b])=>a*b);return[...t.map((x,i)=>'Trabajador '+(i+1)+': '+f2(x)),'Total: '+f2(sum(t))]}],
+[8,'Salario simple','Matemática','Horas trabajadas por tarifa.','h|Horas trabajadas|n|4;t|Tarifa|n|50',v=>['Salario: '+f2(P(v.h)*P(v.t))]],
+[9,'Análisis de notas','Ciclos','Aprobado si la nota es mayor a 10.5 (escala 0-20).','a|Notas|a|15 14 10 5 9',v=>{const n=L(v.a);if(n.some(x=>x<0||x>20))throw Error('Las notas van de 0 a 20');const ap=n.filter(x=>x>10.5),de=n.filter(x=>x<=10.5),m=a=>a.length?f2(sum(a)/a.length):'—';return['Aprobadas: '+ap.length,'Desaprobadas: '+de.length,'Promedio de aprobadas: '+m(ap),'Promedio de desaprobadas: '+m(de),'Promedio general: '+m(n)]}],
+[10,'Suma de dígitos','Ciclos','Suma los dígitos de un número entero.','n|Número|t|152',v=>{const s=v.n.trim().replace(/^-/,'');if(!/^\d+$/.test(s))throw Error('Ingresa un entero');return['Suma de dígitos: '+sum(s.split('').map(Number))]}],
+[11,'Factura con IVA','Matemática','IVA 15%; si el precio bruto supera 50 se descuenta 5%.','p|Precio unitario|n|25;c|Unidades|n|40',v=>{const pv=P(v.p)*P(v.c),iva=pv*.15,b=pv+iva,d=b>50?b*.05:0;return['Precio de venta: '+f2(pv),'IVA (15%): '+f2(iva),'Precio bruto: '+f2(b),'Descuento: '+f2(d),'Total a pagar: '+f2(b-d)]}],
+[12,'Pares, impares, positivos y negativos','Ciclos','Clasifica una lista de números (el original pedía 50).','a|Números|a|1 2 3 4 5 6 7 8 9 10 -3 -8 0',v=>{const n=L(v.a),c=f=>n.filter(f).length;return['Pares: '+c(x=>x%2===0),'Impares: '+c(x=>x%2!==0),'Positivos: '+c(x=>x>0),'Negativos: '+c(x=>x<0),'Ceros: '+c(x=>x===0)]}],
+[13,'Factorial','Ciclos','Calcula n! con BigInt, sin desbordar.','n|Número|n|10',v=>{const n=Math.floor(P(v.n));if(n<0||n>500)throw Error('Ingresa un entero entre 0 y 500');let f=1n;for(let i=2n;i<=BigInt(n);i++)f*=i;return[n+'! = '+big(f)]}],
+[14,'Media aritmética','Ciclos','Promedio de una lista de números (el original pedía 100).','a|Números|a|10 20 30 45.5',v=>{const n=L(v.a);return['Cantidad: '+n.length,'Media: '+f2(sum(n)/n.length)]}],
+[15,'Suma y producto de pares en un rango','Ciclos','Pares entre dos límites, inclusive.','a|Desde|n|20;b|Hasta|n|400',v=>{const a=Math.ceil(P(v.a)),b=Math.floor(P(v.b));let s=0,p=1n,c=0;for(let x=a+(a%2!==0);x<=b;x+=2){s+=x;p*=BigInt(x);c++}if(!c)throw Error('No hay pares en ese rango');return['Pares encontrados: '+c,'Suma: '+s,'Producto: '+big(p)]}],
+[18,'Primera vocal','Texto','Escribe caracteres separados por espacios; se detiene en la primera vocal.','a|Caracteres|t|x z k e b',v=>{const t=v.a.trim().split(/\s+/).filter(Boolean),i=t.findIndex(c=>/^[aeiou]$/.test(norm(c)));return i<0?['Aún no hay vocales en la entrada']:['La primera vocal fue: '+t[i],'Apareció en la posición '+(i+1)]}],
+[19,'Parte fraccionaria','Matemática','Indica si un número tiene parte decimal.','x|Número|n|3.14',v=>{const x=P(v.x);return[x===Math.trunc(x)?'No tiene parte fraccionaria':'Tiene parte fraccionaria: '+f2(Math.abs(x-Math.trunc(x)))]}],
+[20,'Ecuación cuadrática','Matemática','ax² + bx + c = 0, con raíces reales o imaginarias.','a|a|n|1;b|b|n|2;c|c|n|5',v=>{const a=P(v.a),b=P(v.b),c=P(v.c);if(a===0)throw Error('a debe ser distinto de 0');const d=b*b-4*a*c;if(d>0)return['Discriminante: '+f2(d),'x1 = '+f2((-b+Math.sqrt(d))/(2*a)),'x2 = '+f2((-b-Math.sqrt(d))/(2*a))];if(d===0)return['Discriminante: 0','x = '+f2(-b/(2*a))];const r=f2(-b/(2*a)),i=f2(Math.sqrt(-d)/(2*Math.abs(a)));return['Discriminante: '+f2(d)+' (raíces imaginarias)','x1 = '+r+' + '+i+'i','x2 = '+r+' − '+i+'i']}],
+[21,'Operaciones básicas','Matemática','Suma, resta, multiplicación y división (hasta 10 pares, uno por línea).','a|Pares de números|a|8 2\n7 0\n-3 4.5',v=>R(v.a).slice(0,10).flatMap(([a,b],i)=>['Proceso '+(i+1)+': '+a+' y '+b,'  suma '+f2(a+b)+' | resta '+f2(a-b)+' | mult. '+f2(a*b)+' | div. '+(b===0?'indefinida':f2(a/b))])],
+[22,'Cubo y raíz cuadrada','Ciclos','Procesa números hasta encontrar un 0.','a|Números|a|9 16 2.5 -4 0 7',v=>{const o=[];for(const n of L(v.a)){if(n===0){o.push('Se encontró 0: fin del proceso');return o}o.push(n+' → cubo '+f2(n**3)+' | raíz '+(n<0?'no real':f2(Math.sqrt(n))))}o.push('(no se encontró un 0)');return o}],
+[23,'Operaciones hasta primer número 0','Ciclos','Termina cuando el primer número de una línea es 0.','a|Pares de números|a|6 3\n10 4\n0 5\n9 9',v=>{const o=[];for(const[a,b]of R(v.a)){if(a===0){o.push('Primer número 0: fin del proceso');return o}o.push(a+' y '+b+' → '+f2(a+b)+' | '+f2(a-b)+' | '+f2(a*b)+' | '+(b===0?'indefinida':f2(a/b)))}return o}],
+[24,'Área del triángulo (Herón)','Matemática','A partir de los tres lados.','a|Lado A|n|3;b|Lado B|n|4;c|Lado C|n|5',v=>{const a=P(v.a),b=P(v.b),c=P(v.c);if(a<=0||b<=0||c<=0||a+b<=c||a+c<=b||b+c<=a)throw Error('Esos lados no forman un triángulo');const s=(a+b+c)/2;return['Semiperímetro: '+f2(s),'Área: '+f2(Math.sqrt(s*(s-a)*(s-b)*(s-c)))]}],
+[25,'Hipotenusa (Pitágoras)','Matemática','A partir de los catetos.','a|Cateto 1|n|3;b|Cateto 2|n|4',v=>['Hipotenusa: '+f2(Math.hypot(P(v.a),P(v.b)))]],
+[26,'Circunferencia, círculo y esfera','Matemática','Longitud, área y volumen para un radio.','r|Radio|n|5',v=>{const r=pos(P(v.r),'El radio no puede ser negativo');return['Longitud: '+f2(2*Math.PI*r),'Área del círculo: '+f2(Math.PI*r*r),'Volumen de la esfera: '+f2(4/3*Math.PI*r**3)]}],
+[27,'Consumos del restaurante','Ciclos','Consumos mayores a 130 reciben 15% de descuento.','a|Consumos|a|100 150 200 80',v=>{const c=L(v.a),n=c.map(x=>x>130?x*.85:x);return['Consumos: '+c.length,'Con descuento: '+c.filter(x=>x>130).length,'Total a cobrar: '+f2(sum(n))]}],
+[28,'Suma desde 8 hasta N','Ciclos','S = 8 + 9 + 10 + … + N','n|N|n|20',v=>{const n=Math.floor(P(v.n));if(n<8)throw Error('N debe ser al menos 8');let s=0;for(let x=8;x<=n;x++)s+=x;return['Suma de 8 a '+n+': '+s]}],
+[29,'Caja de la compañía','Ciclos','Descuenta egresos de la caja; termina al ingresar -1.','c|Caja inicial|n|371;a|Egresos|a|50 20 100 -1',v=>{let t=0;for(const e of L(v.a)){if(e===-1)break;t+=e}const c=P(v.c);return['Total de egresos: '+f2(t),'Queda en caja: '+f2(c-t)]}],
+[30,'Promedio de dos notas','Condicionales','Aprobado con promedio de 10.5 o más.','a|Primera nota|n|12;b|Segunda nota|n|9',v=>{const a=P(v.a),b=P(v.b);if([a,b].some(x=>x<0||x>20))throw Error('Las notas van de 0 a 20');const p=(a+b)/2;return['Promedio: '+f2(p),p>=10.5?'✅ Aprobado':'❌ Desaprobado']}],
+[31,'Clasificación por deporte','Ciclos','Ajedrez, fútbol, vóley o básquet (separados por espacios).','a|Deportes|a|futbol voley ajedrez futbol basquet pesas',v=>{const k={ajedrez:0,futbol:0,voley:0,basquet:0},bad=[];norm(v.a).split(/[\s,;]+/).filter(Boolean).forEach(d=>d in k?k[d]++:bad.push(d));return[...Object.entries(k).map(([d,n])=>d+': '+n),...(bad.length?['No válidos: '+bad.join(', ')]:[])]}],
+[32,'Control de acceso a la fiesta','Condicionales','Las cinco claves deben ser correctas.','1|Clave 1|t|tienes;2|Clave 2|t|que ser;3|Clave 3|t|invitado;4|Clave 4|t|para;5|Clave 5|t|ingresar',v=>{const ok=['TIENES','QUE SER','INVITADO','PARA','INGRESAR'],i=ok.findIndex((c,j)=>(v[j+1]||'').trim().toUpperCase()!==c);return[i<0?'🎉 BIENVENIDO A LA FIESTA':'⛔ TE EQUIVOCASTE DE FIESTA (falla la clave '+(i+1)+')']}]
+];
+const E=X.map(([n,t,cat,d,f,run])=>({n,t,cat,d,f:f.split(';').map(s=>s.split('|')),run}));
+const CATS=['Todas','★ Favoritos','Condicionales','Ciclos','Matemática','Texto'];
+const fromHash=()=>{const m=/^#ej-(\d+)/.exec(location.hash),n=m?+m[1]:1;return E.some(e=>e.n===n)?n:1};
+const go=n=>{location.hash='ej-'+String(n).padStart(2,'0')};
+const init=e=>Object.fromEntries(e.f.map(x=>[x[0],x[3]]));
+
+function Ex({e,fav,tog,prev,next}){
+  const [v,setV]=useState(()=>init(e)),[cp,setCp]=useState(false);
+  let out,err;try{out=e.run(v)}catch(x){err=x.message}
+  const copy=()=>{try{navigator.clipboard.writeText(out.join('\n'));setCp(true);setTimeout(()=>setCp(false),1200)}catch(x){}};
+  return h('section',{className:'card'},
+    h('div',{className:'hd'},h('div',null,h('div',{className:'tag'},e.cat),h('h2',null,e.n+'. '+e.t)),h('button',{className:'ib',onClick:tog,title:'Favorito'},fav?'★':'☆')),
+    h('p',{className:'d'},e.d),
+    e.f.map(([k,l,t])=>h('label',{key:k},l,t==='a'
+      ?h('textarea',{rows:5,value:v[k],onChange:ev=>setV({...v,[k]:ev.target.value})})
+      :h('input',{type:t==='n'?'number':'text',step:'any',value:v[k],onChange:ev=>setV({...v,[k]:ev.target.value})}))),
+    h('div',{className:'btns'},
+      h('button',{className:'btn',onClick:()=>setV(init(e))},'Ejemplo'),
+      h('button',{className:'btn',onClick:()=>setV(Object.fromEntries(e.f.map(x=>[x[0],''])))},'Limpiar'),
+      !err&&h('button',{className:'btn',onClick:copy},cp?'¡Copiado!':'Copiar resultado')),
+    err?h('div',{className:'out err'},'⚠ '+err):h('pre',{className:'out'},out.join('\n')),
+    h('div',{className:'nav'},h('button',{className:'btn',onClick:prev},'← Anterior'),h('button',{className:'btn',onClick:next},'Siguiente →')));
+}
+
+function App(){
+  const [q,setQ]=useState(''),[cat,setCat]=useState('Todas'),[cur,setCur]=useState(fromHash),[open,setOpen]=useState(false);
+  const [fav,setFav]=useState(()=>{try{return JSON.parse(localStorage.getItem('fav')||'[]')}catch(x){return[]}});
+  const [th,setTh]=useState(()=>{try{return localStorage.getItem('th')||''}catch(x){return''}});
+  const ref=useRef();
+  useEffect(()=>{
+    const f=()=>setCur(fromHash()),k=ev=>{if((ev.ctrlKey||ev.metaKey)&&ev.key.toLowerCase()==='k'){ev.preventDefault();ref.current&&ref.current.focus()}};
+    addEventListener('hashchange',f);addEventListener('keydown',k);
+    return()=>{removeEventListener('hashchange',f);removeEventListener('keydown',k)};
+  },[]);
+  useEffect(()=>{const r=document.documentElement;th?r.setAttribute('data-theme',th):r.removeAttribute('data-theme');try{localStorage.setItem('th',th)}catch(x){}},[th]);
+  const tog=n=>{const a=fav.includes(n)?fav.filter(x=>x!==n):[...fav,n];setFav(a);try{localStorage.setItem('fav',JSON.stringify(a))}catch(x){}};
+  const list=E.filter(e=>(cat==='Todas'||(cat==='★ Favoritos'?fav.includes(e.n):e.cat===cat))&&norm(e.n+' '+e.t+' '+e.cat+' '+e.d).includes(norm(q.trim())));
+  const i=E.findIndex(e=>e.n===cur),e=E[i],dark=th?th==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  return h('div',{className:'app'},
+    h('aside',{className:open?'open':''},
+      h('h1',null,'⚛️ 30 ejercicios'),h('p',{className:'sub'},'De consola C# a React · '+list.length+' de '+E.length),
+      h('input',{ref,value:q,placeholder:'Buscar…  (Ctrl+K)',onChange:ev=>setQ(ev.target.value)}),
+      h('div',{className:'chips'},CATS.map(c=>h('button',{key:c,className:'chip'+(c===cat?' on':''),onClick:()=>setCat(c)},c))),
+      list.length?list.map(x=>h('button',{key:x.n,className:'item'+(x.n===cur?' on':''),onClick:()=>{go(x.n);setOpen(false)}},h('b',null,x.n),h('span',null,x.t),fav.includes(x.n)&&'★'))
+        :h('div',{className:'empty'},'Sin resultados para “'+q+'”.')),
+    h('main',null,
+      h('div',{className:'top'},h('button',{className:'btn menu',onClick:()=>setOpen(!open)},'☰ Menú'),h('div',{className:'grow'}),
+        h('button',{className:'btn',onClick:()=>go(E[Math.floor(Math.random()*E.length)].n)},'🎲 Sorpréndeme'),
+        h('button',{className:'btn',onClick:()=>setTh(dark?'light':'dark')},dark?'☀️':'🌙')),
+      h(Ex,{key:e.n,e,fav:fav.includes(e.n),tog:()=>tog(e.n),prev:()=>go(E[(i+E.length-1)%E.length].n),next:()=>go(E[(i+1)%E.length].n)})));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>
